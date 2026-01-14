@@ -192,7 +192,8 @@ class scraper:
                             tax_id = h4.split(" : ")[1]
                             Thai_tax_ID = str(tax_id).strip()
                         except:
-                            print("error scraping tax id")
+                            pass
+                            # print("error scraping tax id")
 
                         if len(str(_data.Thai_Tax_ID)) > 13:
                             Thai_tax_ID = str(_data.Thai_Tax_ID).strip().replace(".0", "")
@@ -213,8 +214,8 @@ class scraper:
 
                         # Scrape Company Type 
                         try:
-                            # company_type = div_root.find_all_next('div', class_='col-8').get_text().strip(string=True)
-                            company_type = div_root.find('div', string=re.compile("ประเภทนิติบุคคล")).find_next("div").get_text(strip=True)
+                            company_type = div_root.find_all_next('div', class_='col-8').get_text().strip(string=True)
+                            # company_type = div_root.find('div', string=re.compile("ประเภทนิติบุคคล")).find_next("div").get_text(strip=True)
                             data_frame.at[_data.Index, 'ประเภทบริษัท'] = company_type
                             print(f"Found company type: {company_type} for {_data.Account_Name} 👍")
                         except:
@@ -231,6 +232,8 @@ class scraper:
                             print(f"🌏 Extracted Address for {_data.Account_Name}: Street: {address_text}, Province: {data_frame.at[_data.Index, 'Billing_Province']}")
                         except:
                             pass
+
+                    sleep(10)  # To avoid overwhelming the server with requests
 
                     if _data.Index % 300 == 0:
                         print(f"💾 Auto-saving progress to Excel at index {_data.Index}...")
