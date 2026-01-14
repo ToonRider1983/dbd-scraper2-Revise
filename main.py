@@ -91,9 +91,6 @@ class scraper:
                 case EventAction.Submit     : web_element.submit()
             
             # sleep(self.waiting_load)
-            WebDriverWait(self.browser, 60).until(
-                 EC.element_to_be_clickable((refer_web_element, element_value))
-            )
             return True
         except Exception as err:
             print(f"❌ Event driver on element error :{err}")
@@ -165,7 +162,7 @@ class scraper:
                     if progress_start == 0 or _data.Index >= progress_start:
                         print(f"DBD Scraper II {(_data.Index + 1) * 100 / len(data_frame):.2f}% ({_data.Index + 1}/{len(data_frame)}) -> Scraping {_data.Account_Name} ...")
                         self.browser.get(f'https://datawarehouse.dbd.go.th/juristic/searchInfo?keyword={str(_data.Account_Name)}')
-                        WebDriverWait(self.browser, 30).until(
+                        WebDriverWait(self.browser, 60).until(
                             EC.presence_of_element_located((By.TAG_NAME, "body"))
                         )
 
@@ -223,7 +220,7 @@ class scraper:
                         except:
                             pass
 
-                    if _data.Index % 50 == 0:
+                    if _data.Index % 300 == 0:
                         print(f"💾 Auto-saving progress to Excel at index {_data.Index}...")
                         _excel.write_excel(data_frame, f"DBD-AutoSave-{_data.Index}", "Sheet1", False)
                         print(f"✅ Auto-save completed.")
@@ -265,6 +262,7 @@ if __name__ == "__main__":
         if _data_frame is not None:
             if scraper.initialize_browser():
                 if scraper.OpenSite():
+                    sleep(scraper.waiting_load)
                     if scraper.EventDriver_OnElement(EventAction.Click, By.ID, "btnWarning", "", ""):
                         # if scraper.DataScrap(_data_frame, 0)[0]:
                         #     scraper.CloseBrowser()
