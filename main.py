@@ -44,7 +44,7 @@ class scraper:
             chrome_options.add_argument("--log-level=3")
             chrome_options.add_argument("--disable-dev-shm-usage")
             chrome_options.add_argument("--blink-settings=imagesEnabled=false")
-            # chrome_options.add_argument("--disable-javascript")
+            chrome_options.add_argument("--disable-javascript")
             # chrome_options.add_argument("--ignore-certificate-errors")  # Helps bypass SSL issues
             # chrome_options.add_argument("--allow-running-insecure-content")
             chrome_options.add_argument("--disable-blink-features=AutomationControlled")
@@ -163,7 +163,8 @@ class scraper:
                         print(f"DBD Scraper II {(_data.Index + 1) * 100 / len(data_frame):.2f}% ({_data.Index + 1}/{len(data_frame)}) -> Scraping {_data.Account_Name} ...")
                         self.browser.get(f'https://datawarehouse.dbd.go.th/juristic/searchInfo?keyword={str(_data.Account_Name)}')
                         WebDriverWait(self.browser, 60).until(
-                            EC.presence_of_element_located((By.TAG_NAME, "body"))
+                            # EC.presence_of_element_located((By.TAG_NAME, "body"))
+                            EC.presence_of_element_located((By.CLASS_NAME, "page-header"))
                         )
 
                         soup = BeautifulSoup(self.browser.page_source, 'html.parser')
@@ -175,14 +176,25 @@ class scraper:
 
                         # Scrape Thai Tax ID
                         Thai_tax_ID = ""
-                        if _data.Thai_Tax_ID == "" or _data.Thai_Tax_ID == "-":
-                            try:
-                                h4 = div_root.find('h4', string=re.compile("เลขทะเบียนนิติบุคคล")).get_text().strip(string=True)
-                                tax_id = h4.split(" : ")[1]
-                                Thai_tax_ID = str(tax_id).strip()
-                            except:
-                                print("error scraping tax id")
-                        elif len(str(_data.Thai_Tax_ID)) > 13:
+                        # if _data.Thai_Tax_ID == "" or _data.Thai_Tax_ID == "-":
+                        #     try:
+                        #         h4 = div_root.find('h4', string=re.compile("เลขทะเบียนนิติบุคคล")).get_text().strip(string=True)
+                        #         tax_id = h4.split(" : ")[1]
+                        #         Thai_tax_ID = str(tax_id).strip()
+                        #     except:
+                        #         print("error scraping tax id")
+                        # elif len(str(_data.Thai_Tax_ID)) > 13:
+                        #     Thai_tax_ID = str(_data.Thai_Tax_ID).strip().replace(".0", "")
+                        #     Thai_tax_ID = str(f"0{Thai_tax_ID}")
+
+                        try:
+                            h4 = div_root.find('h4', string=re.compile("เลขทะเบียนนิติบุคคล")).get_text().strip(string=True)
+                            tax_id = h4.split(" : ")[1]
+                            Thai_tax_ID = str(tax_id).strip()
+                        except:
+                            print("error scraping tax id")
+
+                        if len(str(_data.Thai_Tax_ID)) > 13:
                             Thai_tax_ID = str(_data.Thai_Tax_ID).strip().replace(".0", "")
                             Thai_tax_ID = str(f"0{Thai_tax_ID}")
 
@@ -230,6 +242,7 @@ class scraper:
                 except KeyboardInterrupt:
                     print(f"🛑 Stop Application by User")
                     is_completed = True
+                    break
                 except Exception as e:
                     print(f"❌ Error during data scraping: {e}")
                     is_completed = False
