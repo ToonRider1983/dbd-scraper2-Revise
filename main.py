@@ -161,7 +161,7 @@ class scraper:
                 try :
                     if progress_start == 0 or _data.Index >= progress_start:
                         print(f"DBD Scraper II {(_data.Index + 1) * 100 / len(data_frame):.2f}% ({_data.Index + 1}/{len(data_frame)}) -> Scraping {_data.Account_Name} ...")
-                        self.browser.get(f'https://datawarehouse.dbd.go.th/juristic/searchInfo?keyword={str(_data.Account_Name)}')
+                        self.browser.get(f'https://datawarehouse.dbd.go.th/juristic/searchInfo?keyword={str(_data.Thai_Tax_ID).strip()}')
                         WebDriverWait(self.browser, 60).until(
                             # EC.presence_of_element_located((By.TAG_NAME, "body"))
                             EC.presence_of_element_located((By.CLASS_NAME, "page-header"))
@@ -176,28 +176,30 @@ class scraper:
 
                         # Scrape Thai Tax ID
                         Thai_tax_ID = ""
-                        # if _data.Thai_Tax_ID == "" or _data.Thai_Tax_ID == "-":
-                        #     try:
-                        #         h4 = div_root.find('h4', string=re.compile("เลขทะเบียนนิติบุคคล")).get_text().strip(string=True)
-                        #         tax_id = h4.split(" : ")[1]
-                        #         Thai_tax_ID = str(tax_id).strip()
-                        #     except:
-                        #         print("error scraping tax id")
-                        # elif len(str(_data.Thai_Tax_ID)) > 13:
-                        #     Thai_tax_ID = str(_data.Thai_Tax_ID).strip().replace(".0", "")
-                        #     Thai_tax_ID = str(f"0{Thai_tax_ID}")
-
-                        try:
-                            h4 = div_root.find('h4', string=re.compile("เลขทะเบียนนิติบุคคล")).get_text().strip(string=True)
-                            tax_id = h4.split(" : ")[1]
-                            Thai_tax_ID = str(tax_id).strip()
-                        except:
-                            pass
-                            # print("error scraping tax id")
-
-                        if len(str(_data.Thai_Tax_ID)) > 13:
+                        if _data.Thai_Tax_ID == "" or _data.Thai_Tax_ID == "-":
+                            try:
+                                h4 = div_root.find('h4', string=re.compile("เลขทะเบียนนิติบุคคล")).get_text().strip(string=True)
+                                tax_id = h4.split(" : ")[1]
+                                Thai_tax_ID = str(tax_id).strip()
+                            except:
+                                print("error scraping tax id")
+                        elif len(str(_data.Thai_Tax_ID)) > 13:
                             Thai_tax_ID = str(_data.Thai_Tax_ID).strip().replace(".0", "")
                             Thai_tax_ID = str(f"0{Thai_tax_ID}")
+                        else:
+                            Thai_tax_ID = str(_data.Thai_Tax_ID).strip()
+
+                        # try:
+                        #     h4 = div_root.find('h4', string=re.compile("เลขทะเบียนนิติบุคคล")).get_text().strip(string=True)
+                        #     tax_id = h4.split(" : ")[1]
+                        #     Thai_tax_ID = str(tax_id).strip()
+                        # except:
+                        #     pass
+                        #     # print("error scraping tax id")
+
+                        # if len(str(_data.Thai_Tax_ID)) > 13:
+                        #     Thai_tax_ID = str(_data.Thai_Tax_ID).strip().replace(".0", "")
+                        #     Thai_tax_ID = str(f"0{Thai_tax_ID}")
 
                         data_frame.at[_data.Index, 'Thai_Tax_ID'] = Thai_tax_ID
                         print(f"Found tax id: ({Thai_tax_ID} | {_data.Thai_Tax_ID}) for {_data.Account_Name} 👍")
@@ -233,7 +235,7 @@ class scraper:
                         except:
                             pass
 
-                    sleep(10)  # To avoid overwhelming the server with requests
+                    sleep(1)  # To avoid overwhelming the server with requests
 
                     if _data.Index % 300 == 0:
                         print(f"💾 Auto-saving progress to Excel at index {_data.Index}...")
